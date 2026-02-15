@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from datetime import datetime
 from collections import defaultdict
+import time
 
 # ============================================================================
 # COLOR DEFINITIONS FOR HELMET
@@ -334,17 +335,26 @@ def main():
     print("  'q' - Quit")
     print("  's' - Save screenshot")
     print("\n" + "="*50 + "\n")
-    
+
+    import time   # <-- must be inside main
+
     while True:
+        start = time.time()
+
         ret, frame = cap.read()
         if not ret:
             print("❌ Error reading frame")
             break
-        
+
         frame = cv2.flip(frame, 1)
         annotated_frame = system.process_frame(frame)
+
+        end = time.time()
+        fps = 1 / (end - start)
+        print("FPS:", round(fps, 2))
+
         cv2.imshow('Construction Safety Detection', annotated_frame)
-        
+
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
             break
@@ -353,7 +363,7 @@ def main():
             filename = f"safety_capture_{timestamp}.jpg"
             cv2.imwrite(filename, annotated_frame)
             print(f"📸 Screenshot saved: {filename}")
-    
+
     cap.release()
     cv2.destroyAllWindows()
     print("\n✅ System shutdown complete")
